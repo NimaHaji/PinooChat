@@ -1,5 +1,38 @@
+## Build output
 bin/
 obj/
+out/
+artifacts/
 /packages/
+
+## User-specific IDE files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
 riderModule.iml
 /_ReSharper.Caches/
+
+## Local configuration and secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Logs and diagnostics
+*.log
+logs/
+TestResults/
+coverage/
+
+## OS files
+.DS_Store
+Thumbs.db
