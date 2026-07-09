@@ -6,7 +6,7 @@ using Application.Features.Session.DTOs;
 using Application.Features.Session.Interfaces;
 using Domain;
 using Domain.Entities;
-using Microsoft.AspNetCore.Http;
+using Domain.Enums;
 using Shared.Exceptions;
 
 namespace Application.Features.Auth.Services;

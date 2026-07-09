@@ -1,10 +1,9 @@
 using Application.Features.Auth.DTOs;
 using Application.Features.Auth.Interfaces;
-using Domain.Entities;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence.Repositories;
+namespace Infrastructure.Persistence.Repositories.User;
 
 public class UserRepository : UserRepositoryContract
 {
@@ -15,13 +14,13 @@ public class UserRepository : UserRepositoryContract
         _context = context;
     }
 
-    public async Task RegisterUserAsync(User user)
+    public async Task RegisterUserAsync(Domain.Entities.User user)
     {
         await _context.Users.AddAsync(user);
         await SaveChangesAsync();
     }
 
-    public async Task<List<User>?> GetUsersByEmailOrUserNameAsync(string identifier)
+    public async Task<List<Domain.Entities.User>?> GetUsersByEmailOrUserNameAsync(string identifier)
     {
         return await _context
             .Users
@@ -65,7 +64,7 @@ public class UserRepository : UserRepositoryContract
             }).ToListAsync();
     }
 
-    public async Task<User?> GetUserByIdAsync(Guid userId)
+    public async Task<Domain.Entities.User?> GetUserByIdAsync(Guid userId)
     {
         return await _context
             .Users

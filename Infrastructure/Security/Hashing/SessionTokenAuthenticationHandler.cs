@@ -1,14 +1,16 @@
 // Infrastructure/Auth/SessionTokenAuthenticationHandler.cs
+
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Application.Common.Interfaces;
 using Application.Features.Auth.Interfaces;
 using Application.Features.Session.Interfaces;
 using Domain;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+namespace Infrastructure.Security.Hashing;
 
 public class SessionTokenAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {

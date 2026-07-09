@@ -1,3 +1,5 @@
+namespace Infrastructure.Security;
+
 public static class SessionTokenDefaults
 {
     public const string AuthenticationScheme = "SessionToken";
