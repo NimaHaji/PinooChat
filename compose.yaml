@@ -1,0 +1,53 @@
+﻿services:
+  redis:
+    image: redis:latest
+    container_name: pinoo-redis
+    ports:
+      - "3569:6379"
+    volumes:
+      - redis-data:/data
+    restart: always
+    networks:
+      - pinoo-network
+
+#  sqlserver:
+#    image: mcr.microsoft.com/mssql/server:2022-latest
+#    container_name: sqlserver
+#    environment:
+#      - ACCEPT_EULA=Y
+#      - SA_PASSWORD=YourStrong!Passw0rd
+#      - MSSQL_PID=Express
+#    ports:
+#      - "1599:1433"
+#    volumes:
+#      - sqlserver-data:/var/opt/mssql
+#    restart: always
+#    networks:
+#      - pinoo-network
+
+  webapi:
+    image: api
+    container_name: pinoo-api
+    build:
+      context: .
+      dockerfile: backend/Api/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+#      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__Redis=redis:6379,abortConnect=false
+    depends_on:
+      - redis
+#      - sqlserver
+    restart: always
+    networks:
+      - pinoo-network
+
+networks:
+  pinoo-network:
+    driver: bridge
+
+volumes:
+  redis-data:

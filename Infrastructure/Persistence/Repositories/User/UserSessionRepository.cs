@@ -3,7 +3,7 @@ using Domain.Entities;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence.Repositories;
+namespace Infrastructure.Persistence.Repositories.User;
 
 public class UserSessionRepository : UserSessionRepositoryContract
 {
