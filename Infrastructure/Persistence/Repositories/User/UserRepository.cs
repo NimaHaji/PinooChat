@@ -71,4 +71,13 @@ public class UserRepository : UserRepositoryContract
             .Where(x => x.Id == userId)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<Dictionary<Guid, string>> GetUserNamesByIdAsync(List<Guid> userIds)
+    {
+        return await _context
+            .Users
+            .Where(x => userIds.Contains(x.Id))
+            .Select(u=>new{u.Id,u.UserName})
+            .ToDictionaryAsync(u=>u.Id,u=>u.UserName);
+    }
 }

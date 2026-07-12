@@ -28,5 +28,17 @@ public class ChatMessageMapping:IEntityTypeConfiguration<ChatMessage>
         builder
             .Property(x => x.TimeStamp)
             .IsRequired();
+        
+        builder
+            .Property(x=>x.MessageStatus)
+            .IsRequired();
+        
+        builder
+            .Property(x=>x.SeenAt)
+            .IsRequired();
+        
+        builder
+            .Property(x=>x.DeliveredAt)
+            .IsRequired();
     }
 }
