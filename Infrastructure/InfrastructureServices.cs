@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Features.Auth.Interfaces;
 using Application.Features.ChatMessages.Repositories;
 using Application.Features.Session.Interfaces;
+using Application.Features.User.Interface;
 using Domain;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
@@ -32,7 +33,7 @@ public static class InfrastructureServices
         services.AddScoped<IHasher, Sha256Hasher>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ChatMessagesRepositoryContract, ChatMessageRepository>();
-        
+        services.AddScoped<UserOnlineStatusRepositoryContract, UserOnlineStatusRepository>();
         return services;
     }
 }

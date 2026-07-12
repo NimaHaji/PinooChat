@@ -42,7 +42,7 @@ public class UserService : UserServiceContract
             throw new DuplicateUserException("این نام کاربری قبلا ثبت شده !");
 
         var password = _passwordHasher.Hash(registerUserRequestDto.Password);
-        var user = new User(registerUserRequestDto.UserName, registerUserRequestDto.FirstName,
+        var user = new Domain.Entities.User(registerUserRequestDto.UserName, registerUserRequestDto.FirstName,
             registerUserRequestDto.LastName, registerUserRequestDto.Email, registerUserRequestDto.MobilePhone,
             password);
         await _userRepositoryContract.RegisterUserAsync(user);
