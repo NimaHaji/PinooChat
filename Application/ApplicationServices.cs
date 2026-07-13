@@ -3,6 +3,8 @@ using Application.Features.Auth.Interfaces;
 using Application.Features.Auth.Services;
 using Application.Features.ChatMessages.Implement;
 using Application.Features.ChatMessages.Repositories;
+using Application.Features.Conversation.Implement;
+using Application.Features.Conversation.Interfaces;
 using Application.Features.Session.Interfaces;
 using Application.Features.Session.Services;
 using Application.Features.User.Implement;
@@ -19,6 +21,7 @@ public static class ApplicationServices
         services.AddScoped<UserSessionServiceContract, UserSessionService>();
         services.AddScoped<ChatMessageServiceContract, ChatMessageService>();
         services.AddScoped<UserOnlineStatusServiceContract, UserOnlineStatusService>();
+        services.AddScoped<ConversationServiceContract, ConversationService>();
         return services;
     }
 }

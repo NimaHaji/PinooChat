@@ -2,6 +2,7 @@ using Application.Common;
 using Application.Common.Interfaces;
 using Application.Features.Auth.Interfaces;
 using Application.Features.ChatMessages.Repositories;
+using Application.Features.Conversation.Interfaces;
 using Application.Features.Session.Interfaces;
 using Application.Features.User.Interface;
 using Domain;
@@ -34,6 +35,7 @@ public static class InfrastructureServices
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ChatMessagesRepositoryContract, ChatMessageRepository>();
         services.AddScoped<UserOnlineStatusRepositoryContract, UserOnlineStatusRepository>();
+        services.AddScoped<ConversationRepositoryContract, ConversationRepository>();
         return services;
     }
 }

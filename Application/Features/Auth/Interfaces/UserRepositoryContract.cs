@@ -14,4 +14,5 @@ public interface UserRepositoryContract
     Task<List<ViewUser>> GetAllUsersAsync();
     Task<Domain.Entities.User?> GetUserByIdAsync(Guid userId);
     Task<Dictionary<Guid,string>> GetUserNamesByIdAsync(List<Guid> userIds);
+    Task<List<Domain.Entities.User>> GetUsersByIdsAsync(List<Guid> userIds);
 }
