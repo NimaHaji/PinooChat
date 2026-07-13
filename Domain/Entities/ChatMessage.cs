@@ -6,6 +6,7 @@ namespace Domain.Entities;
 public class ChatMessage
 {
     public Guid Id { get; private set; }
+    public Guid ConversationId { get; private set; }
     public Guid SenderId { get; private set; }
     public Guid ReceiverId { get; private set; }
     public MessageStatus MessageStatus { get;private set; }
@@ -14,9 +15,10 @@ public class ChatMessage
     public DateTimeOffset SeenAt { get;private set; }
     public DateTimeOffset TimeStamp { get; private set; }
 
-    public ChatMessage(Guid senderId, Guid receiverId, string content)
+    public ChatMessage(Guid conversationId, Guid senderId, Guid receiverId, string content)
     {
         Id = Guid.NewGuid();
+        ConversationId = conversationId;
         SenderId = senderId;
         ReceiverId = receiverId;
         Content = content;

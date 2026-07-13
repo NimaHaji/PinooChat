@@ -80,4 +80,14 @@ public class UserRepository : UserRepositoryContract
             .Select(u=>new{u.Id,u.UserName})
             .ToDictionaryAsync(u=>u.Id,u=>u.UserName);
     }
+
+    public async Task<List<Domain.Entities.User>> GetUsersByIdsAsync(List<Guid> userIds)
+    {
+        if (userIds == null || !userIds.Any())
+            return new List<Domain.Entities.User>();
+        
+        return await _context.Users
+            .Where(u => userIds.Contains(u.Id))
+            .ToListAsync();
+    }
 }
