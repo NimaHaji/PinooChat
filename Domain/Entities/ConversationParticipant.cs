@@ -5,10 +5,12 @@ public class ConversationParticipant
     public Guid Id { get; private set; }
     public Guid ConversationId { get; private set; }
     public Guid UserId { get; private set; }
+    public ParticipantRole ParticipantRole { get; set; }
     public int UnreadMessagesCount { get; private set; }
     public DateTimeOffset JoinedAt { get; private set; }
 
     public Conversation Conversation { get; private set; } = null!;
+    public User User { get; private set; }
 
     private ConversationParticipant()
     {
@@ -31,4 +33,11 @@ public class ConversationParticipant
     {
         UnreadMessagesCount = 0;
     }
+}
+
+public enum ParticipantRole
+{
+    Owner,
+    Admin,
+    Member
 }

@@ -4,7 +4,9 @@ using Application.Features.Auth.Interfaces;
 using Application.Features.ChatMessages.DTOs;
 using Application.Features.ChatMessages.Repositories;
 using Application.Features.Conversation.Interfaces;
+using Application.Features.Group.DTOs;
 using Domain.Entities;
+using Shared.Exceptions;
 
 namespace Application.Features.ChatMessages.Implement;
 
@@ -29,36 +31,36 @@ public class ChatMessageService : ChatMessageServiceContract
 
     public async Task<SentChatMessageDto> SendMessageAsync(SendMessageDto dto)
     {
-        if (dto.SenderId == Guid.Empty)
-            throw new ValidationException("شناسه فرستنده نامعتبر است.");
-
-        if (dto.ReceiverId == Guid.Empty)
-            throw new ValidationException("شناسه گیرنده نامعتبر است.");
-
-        if (dto.SenderId == dto.ReceiverId)
-            throw new ValidationException("ارسال پیام به خودتان مجاز نیست.");
-
-        if (string.IsNullOrWhiteSpace(dto.Content))
-            throw new ValidationException("پیام نمی‌تواند خالی باشد.");
-
-        if (dto.Content.Length > 1000)
-            throw new ValidationException("پیام بسیار طولانی است.");
-
         var normalizedContent = dto.Content.Trim();
 
-        var conversation = await _conversationRepository.GetConversationByParticipantIds(dto.SenderId, dto.ReceiverId);
+        var conversation = await _conversationRepository
+            .GetConversationByParticipantIds(dto.SenderId, dto.ReceiverId);
 
         if (conversation is null)
         {
-            conversation = Domain.Entities.Conversation.Create(dto.SenderId, dto.ReceiverId);
+            conversation = Domain.Entities.Conversation.CreatePrivate(dto.SenderId, dto.ReceiverId);
             await _conversationRepository.AddConversationAsync(conversation);
+        }
+
+        ChatMessage? replyMessage = null;
+
+        if (dto.ReplyToId.HasValue)
+        {
+            replyMessage = await _chatRepository.GetByIdAsync(dto.ReplyToId.Value);
+
+            if (replyMessage is null)
+                throw new NotFoundException("پیام مورد نظر یافت نشد.");
+
+            if (replyMessage.ConversationId != conversation.Id)
+                throw new ValidationException("پیام انتخاب شده متعلق به این گفتگو نیست.");
         }
 
         var message = new ChatMessage(
             conversationId: conversation.Id,
             senderId: dto.SenderId,
             receiverId: dto.ReceiverId,
-            content: normalizedContent
+            content: normalizedContent,
+            replyToId: dto.ReplyToId
         );
 
         await _chatRepository.AddMessageAsync(message);
@@ -70,19 +72,69 @@ public class ChatMessageService : ChatMessageServiceContract
 
         await _unitOfWorkContract.SaveAsync();
 
-        var sender = await _userRepository.GetUserByIdAsync(dto.SenderId);
-        var receiver = await _userRepository.GetUserByIdAsync(dto.ReceiverId);
-        
         return new SentChatMessageDto
         {
             Id = message.Id,
             ConversationId = conversation.Id,
             SenderId = message.SenderId,
-            SenderName = $"{sender?.FirstName} {sender?.LastName}".Trim(),
             ReceiverId = message.ReceiverId,
-            ReceiverName = $"{receiver?.FirstName} {receiver?.LastName}".Trim(),
             Content = message.Content,
-            TimeStamp = message.TimeStamp
+            TimeStamp = message.TimeStamp,
+
+            ReplyTo = replyMessage == null
+                ? null
+                : new ReplyToMessagePreview
+                {
+                    Id = replyMessage.Id,
+                    SenderId = replyMessage.SenderId,
+                    Content = replyMessage.Content
+                }
+        };
+    }
+
+    public async Task<GroupMessageResultDto> SendGroupMessageAsync(Guid senderId,SendGroupMessageDto dto)
+    {
+        
+        if (string.IsNullOrWhiteSpace(dto.Content))
+            throw new ValidationException("Message content cannot be empty");
+    
+        if (dto.MemberIds == null || !dto.MemberIds.Any())
+            throw new ValidationException("Member IDs list cannot be empty");
+        
+        var conversation = await _conversationRepository.GetGroupByMembersAsync(senderId, dto.MemberIds);
+
+        if (conversation is null)
+            throw new ValidationException("Group conversation not found");
+        
+        var sender = conversation.Participants
+            .FirstOrDefault(p => p.UserId == senderId);
+
+        if (sender is null)
+            throw new ValidationException("Sender is not a member of this group");
+        
+        var message = new ChatMessage(
+            conversationId: conversation.Id,
+            senderId: senderId,
+            content: dto.Content,
+            replyToId: dto.ReplyToId
+        );
+        
+        await _chatRepository.AddMessageAsync(message);
+        
+        conversation.UpdateLastMessage(dto.Content);
+        
+        await _unitOfWorkContract.SaveAsync();
+        
+        return new GroupMessageResultDto
+        {
+            Id = message.Id,
+            ConversationId = conversation.Id,
+            GroupTitle = conversation.Group?.GroupTitle,
+            Content = message.Content,
+            TimeStamp = message.TimeStamp,
+            SenderId = senderId,
+            MemberIds = conversation.Participants.Select(p => p.UserId).ToList(),
+            IsGroupMessage = true
         };
     }
 

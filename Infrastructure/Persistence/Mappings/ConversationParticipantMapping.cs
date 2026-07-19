@@ -20,11 +20,24 @@ public class ConversationParticipantMapping : IEntityTypeConfiguration<Conversat
             .IsRequired();
         
         builder
+            .Property(cp=>cp.ParticipantRole)
+            .IsRequired();
+        
+        builder.Property(cp=>cp.UnreadMessagesCount)
+            .IsRequired();
+        
+        builder
             .HasOne(cp=>cp.Conversation)
             .WithMany(c=>c.Participants)
             .HasForeignKey(f=>f.ConversationId)
             .OnDelete(DeleteBehavior.Cascade);
-
+        
+        builder
+            .HasOne(cp=>cp.User)
+            .WithMany(u=>u.ConversationParticipants)
+            .HasForeignKey(f=>f.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+        
         builder.HasIndex(cp => cp.UserId);
     }
 }

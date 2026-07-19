@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ChatContext))]
-    partial class ChatContextModelSnapshot : ModelSnapshot
+    [Migration("20260718090555_GroupFixed")]
+    partial class GroupFixed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ChatMessage", b =>
+            modelBuilder.Entity("Domain.Entities.ChatMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -41,13 +44,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<int>("MessageStatus")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ReceiverId")
+                    b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ReplyToId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset?>("SeenAt")
+                    b.Property<DateTimeOffset>("SeenAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("SenderId")
@@ -263,7 +266,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("UserSessions", (string)null);
                 });
 
-            modelBuilder.Entity("ChatMessage", b =>
+            modelBuilder.Entity("Domain.Entities.ChatMessage", b =>
                 {
                     b.HasOne("Domain.Entities.Conversation", "Conversation")
                         .WithMany("Messages")
@@ -271,7 +274,7 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ChatMessage", "ReplyTo")
+                    b.HasOne("Domain.Entities.ChatMessage", "ReplyTo")
                         .WithMany("Replies")
                         .HasForeignKey("ReplyToId")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -330,7 +333,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ChatMessage", b =>
+            modelBuilder.Entity("Domain.Entities.ChatMessage", b =>
                 {
                     b.Navigation("Replies");
                 });

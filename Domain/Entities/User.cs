@@ -18,6 +18,11 @@ public class User
     public int PasswordResetAttemptsCount { get; private set; }
     public ICollection<UserSession> Sessions { get; private set; } = new List<UserSession>();
 
+    public List<ConversationParticipant> ConversationParticipants { get; private set; } =
+        new List<ConversationParticipant>();
+
+    public List<ChatMessage> ChatMessages { get; private set; } = new List<ChatMessage>();
+
     public User(string userName, string firstName, string? lastName, string? email, string? mobilePhone,
         string passwordHash)
     {
@@ -36,6 +41,7 @@ public class User
     {
         UserRole = role;
     }
+
     public void UpdateProfile(string? firstName, string? lastName, string? mobilePhone)
     {
         FirstName = firstName;

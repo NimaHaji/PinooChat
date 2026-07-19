@@ -11,10 +11,18 @@ public class ConversationMapping:IEntityTypeConfiguration<Conversation>
         builder.ToTable("Conversations");
         
         builder.HasKey(x => x.Id);
+
+        builder
+            .Property(c => c.CreatedAt)
+            .IsRequired();
         
-        builder.Property(x => x.LastMessage).IsRequired();
+        builder.Property(x => x.LastMessage);
         
-        builder.Property(x => x.LastMessageAt).IsRequired();
+        builder.Property(x => x.LastMessageAt);
+
+        builder
+            .Property(x => x.ConversationType)
+            .IsRequired();
         
         builder
             .HasMany(x => x.Participants)
@@ -24,9 +32,8 @@ public class ConversationMapping:IEntityTypeConfiguration<Conversation>
         
         builder
             .HasMany(c => c.Messages)
-            .WithOne()
+            .WithOne(x=>x.Conversation)
             .HasForeignKey(f=>f.ConversationId)
-            .OnDelete(DeleteBehavior.Cascade);
-            
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

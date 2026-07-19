@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Features.Auth.Interfaces;
 using Application.Features.ChatMessages.Repositories;
 using Application.Features.Conversation.Interfaces;
+using Application.Features.Group.Interfaces;
 using Application.Features.Session.Interfaces;
 using Application.Features.User.Interface;
 using Domain;
@@ -36,6 +37,7 @@ public static class InfrastructureServices
         services.AddScoped<ChatMessagesRepositoryContract, ChatMessageRepository>();
         services.AddScoped<UserOnlineStatusRepositoryContract, UserOnlineStatusRepository>();
         services.AddScoped<ConversationRepositoryContract, ConversationRepository>();
+        services.AddScoped<GroupRepositoryContract,GroupRepository>();
         return services;
     }
 }

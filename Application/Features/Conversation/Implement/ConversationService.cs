@@ -35,7 +35,7 @@ public class ConversationService : ConversationServiceContract
             new ConversationParticipant(receiverId)
         };
 
-        var newConversation = Domain.Entities.Conversation.Create(participants);
+        var newConversation = Domain.Entities.Conversation.CreatePrivate(senderId,receiverId);
 
         await _conversationRepository.AddConversationAsync(newConversation);
         await _unitOfWorkContract.SaveAsync();

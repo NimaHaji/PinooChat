@@ -1,5 +1,6 @@
 using Application.Features.Auth.DTOs;
 using Application.Features.Session.DTOs;
+using Application.Features.User.DTOs;
 using Domain.Entities;
 
 namespace Application.Features.Auth.Interfaces;
@@ -15,4 +16,5 @@ public interface UserServiceContract
     Task<List<ViewUser>> GetAllUsersAsync();
     Task<string> PromoteUserToAdminAsync(Guid userId);
     Task<string> DemoteAdminToUserAsync(Guid userId);
+    Task<List<SearchMatchedUsersDto>> GetUserByUserName(string username);
 }
