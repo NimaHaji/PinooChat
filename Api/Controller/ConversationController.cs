@@ -49,12 +49,4 @@ public class ConversationController : ControllerBase
             return NotFound("گفتگوی مورد نظر یافت نشد.");
         }
     }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                          ?? User.FindFirst("sub")?.Value;
-
-        return Guid.TryParse(userIdClaim, out var parsedGuid) ? parsedGuid : Guid.Empty;
-    }
 }

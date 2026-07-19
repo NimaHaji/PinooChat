@@ -1,7 +1,7 @@
 using Api;
 using Api.Hub;
 using Application;
-using Application.Validator.User;
+using Application.Features.User.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
@@ -14,7 +14,7 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:3569";
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
@@ -38,7 +38,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:5500",
                 "https://localhost:5500",
                 "http://localhost:3000",
-                "http://localhost:5173"
+                "http://localhost:6379",
+                "http://localhost:5174"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()

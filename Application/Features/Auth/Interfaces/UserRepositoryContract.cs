@@ -1,4 +1,5 @@
 using Application.Features.Auth.DTOs;
+using Application.Features.User.DTOs;
 using Domain.Entities;
 
 namespace Application.Features.Auth.Interfaces;
@@ -15,4 +16,5 @@ public interface UserRepositoryContract
     Task<Domain.Entities.User?> GetUserByIdAsync(Guid userId);
     Task<Dictionary<Guid,string>> GetUserNamesByIdAsync(List<Guid> userIds);
     Task<List<Domain.Entities.User>> GetUsersByIdsAsync(List<Guid> userIds);
+    Task<List<SearchMatchedUsersDto>?> GetUsersByUserNameAsync(string username);
 }

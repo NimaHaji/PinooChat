@@ -1,5 +1,6 @@
 using Application.Features.Auth.DTOs;
 using Application.Features.Auth.Interfaces;
+using Application.Features.User.DTOs;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +61,7 @@ public class UserRepository : UserRepositoryContract
             {
                 FullName = x.FirstName + " " + x.LastName,
                 Email = x.Email,
+                UserRole = x.UserRole.ToString(),
                 PhoneNumber = x.MobilePhone,
             }).ToListAsync();
     }
@@ -88,6 +90,22 @@ public class UserRepository : UserRepositoryContract
         
         return await _context.Users
             .Where(u => userIds.Contains(u.Id))
+            .ToListAsync();
+    }
+
+    public async Task<List<SearchMatchedUsersDto>?> GetUsersByUserNameAsync(string username)
+    {
+       return await _context
+            .Users
+            .Where(us => us.UserName.Contains(username))
+            .OrderBy(us => us.UserName.Length)
+            .ThenBy(us => us.UserName)
+            .Take(5)
+            .Select(us => new SearchMatchedUsersDto()
+            {
+                Id = us.Id,
+                UserName = us.UserName
+            })
             .ToListAsync();
     }
 }

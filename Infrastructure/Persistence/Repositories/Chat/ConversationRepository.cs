@@ -1,5 +1,6 @@
 using Application.Features.Conversation.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,23 @@ public class ConversationRepository:ConversationRepositoryContract
             .GroupBy(p => p.Conversation)
             .Where(g => g.Count() == 2)
             .Select(g => g.Key)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<Conversation?> GetGroupByMembersAsync(Guid senderId,List<Guid> membersIds)
+    {
+        var allMemberIds = membersIds
+            .Concat(new[] { senderId })
+            .Distinct()
+            .ToList();
+    
+        return await _chatContext.Conversations
+            .AsNoTracking()
+            .Where(c => c.ConversationType == ConversationType.Group)
+            .Where(c => c.Participants.Count == allMemberIds.Count)
+            .Where(c => allMemberIds.All(id => c.Participants.Any(p => p.UserId == id)))
+            .Include(c => c.Group)
+            .Include(c => c.Participants)
             .FirstOrDefaultAsync();
     }
 

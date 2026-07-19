@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Application.Features.ChatMessages.DTOs;
 using Application.Features.ChatMessages.Repositories;
+using Application.Features.Group.DTOs;
 using Application.Features.User.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -60,7 +61,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         await Clients.Caller.SendAsync("OnlineUsers", onlineUsers);
     }
 
-    public async Task SendPrivateMessage(string receiverIdString, string content)
+    public async Task SendPrivateMessage(SendMessageDto messageDto)
     {
         var senderId = GetUserId();
 
@@ -70,7 +71,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             return;
         }
 
-        if (!Guid.TryParse(receiverIdString, out var receiverId))
+        if (!Guid.TryParse(messageDto.ReceiverId.ToString(), out var receiverId))
         {
             await Clients.Caller.SendAsync("Error", "Invalid receiver identifier");
             return;
@@ -84,14 +85,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 
         try
         {
-            var dto = new SendMessageDto
-            {
-                SenderId = senderId.Value,
-                ReceiverId = receiverId,
-                Content = content
-            };
-
-            var result = await _chatMessageServiceContract.SendMessageAsync(dto);
+            var result = await _chatMessageServiceContract.SendMessageAsync(messageDto);
 
             var receiverConnections =
                 await _userOnlineStatusServiceContract.GetUserConnectionsByIdAsync(receiverId.ToString());
@@ -149,6 +143,50 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         }
     }
 
+    public async Task SendGroupMessage(SendGroupMessageDto messageDto)
+    {
+        var senderId = GetUserId();
+        if (!senderId.HasValue)
+        {
+            await Clients.Caller.SendAsync("Error", "User not authenticated");
+            return;
+        }
+        
+        try
+        {
+            // 1. تمام منطق توی GroupService انجام میشه
+            var result = await _chatMessageServiceContract.SendGroupMessageAsync(senderId.Value,messageDto);
+
+            // 2. فقط ارسال پیام به اعضای آنلاین
+            foreach (var memberId in result.MemberIds.Where(m => m != senderId.Value))
+            {
+                var connections = await _userOnlineStatusServiceContract.GetUserConnectionsByIdAsync(memberId.ToString());
+
+                if (connections?.Any() == true)
+                {
+                    var tasks = connections.Select(conn =>
+                        Clients.Client(conn).SendAsync("ReceiveMessage", result));
+                    await Task.WhenAll(tasks);
+                }
+            }
+
+            // 3. بروزرسانی لیست همه اعضا
+            var allMemberIds = result.MemberIds.Select(m => m.ToString()).ToList();
+            await Clients.Users(allMemberIds).SendAsync("UpdateConversationList", result);
+
+            // 4. تایید به فرستنده
+            await Clients.Caller.SendAsync("MessageSent", result);
+        }
+        catch (ValidationException ex)
+        {
+            await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+        catch (Exception)
+        {
+            await Clients.Caller.SendAsync("Error", "Failed to send message");
+        }
+    }
+
     public async Task MarkMessagesAsSeen(List<Guid> messageIds)
     {
         try
@@ -175,7 +213,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         var userId = GetUserId();
     }
-    
+
     private Guid? GetUserId()
     {
         var userIdString = Context.UserIdentifier;

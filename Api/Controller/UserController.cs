@@ -1,5 +1,6 @@
 using Application.Features.Auth.DTOs;
 using Application.Features.Auth.Interfaces;
+using Application.Features.User.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,18 +10,18 @@ namespace Api.Controller;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly UserServiceContract _serviceContract;
+    private readonly UserServiceContract _userServiceContract;
 
-    public UserController(UserServiceContract serviceContract)
+    public UserController(UserServiceContract userServiceContract)
     {
-        _serviceContract = serviceContract;
+        _userServiceContract = userServiceContract;
     }
 
     #region Authentication
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserRequestDto registerUserRequestDto)
     {
-        var res = await _serviceContract.RegisterUserAsync(registerUserRequestDto);
+        var res = await _userServiceContract.RegisterUserAsync(registerUserRequestDto);
 
         var loginDto = new LoginUserRequestDto()
         {
@@ -43,7 +44,7 @@ public class UserController : ControllerBase
         var userAgent = Request.Headers["User-Agent"].ToString();
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-        var result = await _serviceContract.LoginUserAsync(requestDto, userAgent, ipAddress);
+        var result = await _userServiceContract.LoginUserAsync(requestDto, userAgent, ipAddress);
             
         SetSessionCookie(result.accessToken);
         
@@ -64,7 +65,7 @@ public class UserController : ControllerBase
         var userAgent = Request.Headers["User-Agent"].ToString();
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         
-        var result = await _serviceContract.RotateTokenAsync(refreshToken,userAgent,ipAddress);
+        var result = await _userServiceContract.RotateTokenAsync(refreshToken,userAgent,ipAddress);
 
         SetSessionCookie(result.RefreshToken);
 
@@ -79,7 +80,7 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        var res=await _serviceContract.LogoutUserAsync();
+        var res=await _userServiceContract.LogoutUserAsync();
         return Ok(res);
     }
     #endregion
@@ -88,16 +89,26 @@ public class UserController : ControllerBase
     [Authorize(Roles =  "Admin")]
     public async Task<IActionResult> ViewUsers()
     {
-        var res= await _serviceContract.GetAllUsersAsync();
+        var res= await _userServiceContract.GetAllUsersAsync();
         return Ok(res);
     }
+
+    #region Search
+    [HttpGet("Search")]
+    public async Task<IActionResult> Search([FromQuery] string UserName)
+    {
+        var user=await _userServiceContract.GetUserByUserName(UserName);
+        return Ok(user);
+    }
+
+    #endregion
     
     #region Profile
     [HttpGet("Profile")]
     [Authorize]
     public async Task<IActionResult> Profile()
     {
-        var profile = await _serviceContract.ViewProfileAsync();
+        var profile = await _userServiceContract.ViewProfileAsync();
         return Ok(profile);
     }
     
@@ -105,7 +116,7 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<ProfileResponseDto> UpdateProfile([FromBody] UpdateProfileRequestDto updateProfileRequestDto)
     {
-        return await _serviceContract.UpdateProfileAsync(updateProfileRequestDto);
+        return await _userServiceContract.UpdateProfileAsync(updateProfileRequestDto);
     }
     #endregion
 
@@ -114,7 +125,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Promote(Guid userId)
     {
-       var result= await _serviceContract.PromoteUserToAdminAsync(userId);
+       var result= await _userServiceContract.PromoteUserToAdminAsync(userId);
        return Ok(result);
     }
     
@@ -122,7 +133,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Demote(Guid userId)
     {
-        var result= await _serviceContract.DemoteAdminToUserAsync(userId);
+        var result= await _userServiceContract.DemoteAdminToUserAsync(userId);
         return Ok(result);
     }
     #endregion

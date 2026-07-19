@@ -4,6 +4,7 @@ using Application.Features.Auth.DTOs;
 using Application.Features.Auth.Interfaces;
 using Application.Features.Session.DTOs;
 using Application.Features.Session.Interfaces;
+using Application.Features.User.DTOs;
 using Domain;
 using Domain.Entities;
 using Domain.Enums;
@@ -207,20 +208,29 @@ public class UserService : UserServiceContract
     {
         var user = await _userRepositoryContract.GetUserByIdAsync(userId) ??
                    throw new NotFoundException("کاربر یافت نشد .");
-        
+
         user.ChangeRole(UserRole.Admin);
-        
+
         await _unitOfWorkContract.SaveAsync();
         return $"کاربر {user.UserName} ادمین شد .";
     }
+
     public async Task<string> DemoteAdminToUserAsync(Guid userId)
     {
         var user = await _userRepositoryContract.GetUserByIdAsync(userId) ??
                    throw new NotFoundException("کاربر یافت نشد .");
-        
+
         user.ChangeRole(UserRole.User);
-        
+
         await _unitOfWorkContract.SaveAsync();
         return $"ادمین {user.UserName} کاربر شد .";
+    }
+
+    public async Task<List<SearchMatchedUsersDto>> GetUserByUserName(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            return new();
+
+        return await _userRepositoryContract.GetUsersByUserNameAsync(username) ?? new();
     }
 }
